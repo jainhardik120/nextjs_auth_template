@@ -3,7 +3,7 @@ import { cache } from "react";
 
 import { authOptions } from "./config";
 
-const { auth : uncachedAuth, handlers, signIn, signOut } = NextAuth(authOptions);
+const { auth: uncachedAuth, handlers, signIn, signOut } = NextAuth(authOptions);
 
 const auth = cache(uncachedAuth);
 

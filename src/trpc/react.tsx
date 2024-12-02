@@ -14,7 +14,6 @@ import { createQueryClient } from "./query-client";
 
 // export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
   if (typeof window === "undefined") {
@@ -25,9 +24,7 @@ const getQueryClient = () => {
 
 export const api = createTRPCReact<AppRouter>();
 
-
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
-
   const queryClient = getQueryClient();
 
   const [trpcClient] = useState(() =>
@@ -48,7 +45,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           },
         }),
       ],
-    })
+    }),
   );
 
   return (
@@ -59,7 +56,6 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     </QueryClientProvider>
   );
 }
-
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return window.location.origin;

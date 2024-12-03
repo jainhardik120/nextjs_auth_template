@@ -33,20 +33,20 @@ export default function ResetForm() {
   });
 
   const mutation = api.auth.resetPassword.useMutation({
-    onSuccess : (data)=>{
-      setSuccess(data.success)
+    onSuccess: (data) => {
+      setSuccess(data.success);
     },
-    onError:(data)=>{
-      setError(data.message)
-    }
-  })
+    onError: (data) => {
+      setError(data.message);
+    },
+  });
 
   const onSubmit = (values: z.infer<typeof ResetSchema>) => {
     setError("");
     setSuccess("");
 
     startTransition(() => {
-      mutation.mutate(values)    
+      mutation.mutate(values);
     });
   };
 

@@ -5,7 +5,7 @@ import { authRouter } from "./routers/auth";
 
 export const appRouter = createTRPCRouter({
   post: postRouter,
-  auth : authRouter
+  auth: authRouter,
 });
 
 export type AppRouter = typeof appRouter;

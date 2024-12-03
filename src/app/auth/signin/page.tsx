@@ -1,27 +1,27 @@
-import { redirect } from "next/navigation"
-import { signIn } from "@/server/auth"
-import { providerMap } from "@/server/auth/config"
-import { AuthError } from "next-auth"
-import { LoginForm } from "./login-form"
+import { redirect } from "next/navigation";
+import { signIn } from "@/server/auth";
+import { providerMap } from "@/server/auth/config";
+import { AuthError } from "next-auth";
+import { LoginForm } from "./login-form";
 
-const SIGNIN_ERROR_URL = "/api/auth/error"
+const SIGNIN_ERROR_URL = "/api/auth/error";
 
 export default function SignInPage() {
   return (
     <div className="flex flex-col gap-2">
-      <LoginForm/>
+      <LoginForm />
       {Object.values(providerMap).map((provider) => (
         <form
           key={provider.id}
           action={async () => {
-            "use server"
+            "use server";
             try {
-              await signIn(provider.id)
+              await signIn(provider.id);
             } catch (error) {
               if (error instanceof AuthError) {
-                return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`)
+                return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`);
               }
-              throw error
+              throw error;
             }
           }}
         >
@@ -31,5 +31,5 @@ export default function SignInPage() {
         </form>
       ))}
     </div>
-  )
+  );
 }

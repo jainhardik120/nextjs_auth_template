@@ -11,7 +11,6 @@ import { type AppRouter } from "@/server/api/root";
 import { createQueryClient } from "./query-client";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 
-
 // export type RouterInputs = inferRouterInputs<AppRouter>;
 
 // export type RouterOutputs = inferRouterOutputs<AppRouter>;
@@ -58,4 +57,3 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     </QueryClientProvider>
   );
 }
-

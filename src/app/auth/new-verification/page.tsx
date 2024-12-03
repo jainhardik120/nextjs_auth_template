@@ -15,13 +15,13 @@ export default function NewVerificationForm() {
   const token = searchParams.get("token");
 
   const mutation = api.auth.verifyEmail.useMutation({
-    onSuccess : (data)=>{
-      setSuccess(data.success)
+    onSuccess: (data) => {
+      setSuccess(data.success);
     },
-    onError:(data)=>{
-      setError(data.message)
-    }
-  })
+    onError: (data) => {
+      setError(data.message);
+    },
+  });
 
   const onsubmit = useCallback(() => {
     if (success || error) return;
@@ -31,6 +31,7 @@ export default function NewVerificationForm() {
       return;
     }
     mutation.mutate({ token });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, success, error]);
 
   useEffect(() => {

@@ -6,21 +6,28 @@ export default async function Home() {
     return (
       <>
         Signed in as {session.user?.email} <br />
-        <button onClick={async () => {
-          "use server"
-          await signOut()
-        }}>Sign out</button>
+        <button
+          onClick={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
+          Sign out
+        </button>
       </>
-    )
+    );
   }
   return (
     <>
       Not signed in <br />
-      <button onClick={async () => {
-          "use server"
-          await signIn()
-        }}>Sign in</button>
+      <button
+        onClick={async () => {
+          "use server";
+          await signIn();
+        }}
+      >
+        Sign in
+      </button>
     </>
-  )
-
+  );
 }

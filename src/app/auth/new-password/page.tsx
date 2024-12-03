@@ -38,18 +38,18 @@ export default function NewPasswordForm() {
 
   const mutation = api.auth.newPassword.useMutation({
     onSuccess: (data) => {
-      setSuccess(data.success)
+      setSuccess(data.success);
     },
     onError: (data) => {
-      setError(data.message)
-    }
-  })
+      setError(data.message);
+    },
+  });
 
   const onSubmit = (values: z.infer<typeof NewPasswordSchema>) => {
     setError("");
     setSuccess("");
     startTransition(() => {
-      mutation.mutate({ ...values, token: token || "" })
+      mutation.mutate({ ...values, token: token || "" });
     });
   };
 

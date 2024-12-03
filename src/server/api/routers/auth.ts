@@ -1,18 +1,22 @@
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import {
-  createTRPCRouter,
-  publicProcedure,
-} from "@/server/api/trpc";
-import { LoginSchema, NewPasswordSchema, RegisterSchema, ResetSchema } from "@/schemas";
+  LoginSchema,
+  NewPasswordSchema,
+  RegisterSchema,
+  ResetSchema,
+} from "@/schemas";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
-import { generatePasswordResetToken, generateVerificationToken } from "@/lib/tokens";
+import {
+  generatePasswordResetToken,
+  generateVerificationToken,
+} from "@/lib/tokens";
 import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
 import * as z from "zod";
 import { getVerificationTokenByToken } from "@/data/verification-token";
 import { signIn } from "@/server/auth";
 import { AuthError } from "next-auth";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
-
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -22,8 +26,8 @@ export const authRouter = createTRPCRouter({
       if (!validatedFields.success) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid fields!"
-        })
+          message: "Invalid fields!",
+        });
       }
 
       const { email, password, name } = validatedFields.data;
@@ -37,8 +41,8 @@ export const authRouter = createTRPCRouter({
       if (existingUser) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Email already in use!"
-        })
+          message: "Email already in use!",
+        });
       }
       await ctx.db.user.create({
         data: {
@@ -48,7 +52,10 @@ export const authRouter = createTRPCRouter({
         },
       });
       const verificationToken = await generateVerificationToken(email);
-      await sendVerificationEmail(verificationToken.email, verificationToken.token);
+      await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token,
+      );
       return { success: "Confirmation email sent!" };
     }),
   verifyEmail: publicProcedure
@@ -90,66 +97,69 @@ export const authRouter = createTRPCRouter({
       });
       return { success: "Email verified!" };
     }),
-  login: publicProcedure
-    .input(LoginSchema)
-    .mutation(async ({ ctx, input }) => {
-      const validatedFields = LoginSchema.safeParse(input);
+  login: publicProcedure.input(LoginSchema).mutation(async ({ ctx, input }) => {
+    const validatedFields = LoginSchema.safeParse(input);
 
-      if (!validatedFields.success) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid fields!",
-        });
-      }
-
-      const { email, password } = validatedFields.data;
-
-      const existingUser = await ctx.db.user.findUnique({
-        where: { email }
+    if (!validatedFields.success) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Invalid fields!",
       });
+    }
 
-      if (!existingUser || !existingUser.email || !existingUser.password) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Email does not exist or user signed in with OAuth!",
-        });
-      }
+    const { email, password } = validatedFields.data;
 
-      if (!existingUser.emailVerified) {
-        const verificationToken = await generateVerificationToken(existingUser.email);
-        await sendVerificationEmail(verificationToken.email, verificationToken.token);
+    const existingUser = await ctx.db.user.findUnique({
+      where: { email },
+    });
 
-        return { success: "Confirmation email sent!" };
-      }
+    if (!existingUser || !existingUser.email || !existingUser.password) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Email does not exist or user signed in with OAuth!",
+      });
+    }
 
-      try {
-        await signIn("credentials", {
-          email,
-          password,
-          redirect: false
-        });
-      } catch (error) {
-        if (error instanceof AuthError) {
-          switch (error.type) {
-            case "CredentialsSignin":
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Invalid credentials!",
-              });
-            default:
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Something went wrong!",
-              });
-          }
+    if (!existingUser.emailVerified) {
+      const verificationToken = await generateVerificationToken(
+        existingUser.email,
+      );
+      await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token,
+      );
+
+      return { success: "Confirmation email sent!" };
+    }
+
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+    } catch (error) {
+      if (error instanceof AuthError) {
+        switch (error.type) {
+          case "CredentialsSignin":
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Invalid credentials!",
+            });
+          default:
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Something went wrong!",
+            });
         }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong!",
-        });
       }
-      return { success: "Logged in successfully!" };
-    }),
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong!",
+      });
+    }
+    return { success: "Logged in successfully!" };
+  }),
   resetPassword: publicProcedure
     .input(ResetSchema)
     .mutation(async ({ ctx, input }) => {
@@ -183,7 +193,7 @@ export const authRouter = createTRPCRouter({
     .input(
       NewPasswordSchema.extend({
         token: z.string().min(1, "Missing or invalid token!"),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { password, token } = input;
@@ -207,7 +217,9 @@ export const authRouter = createTRPCRouter({
       }
 
       // Get user and validate existence
-      const existingUser = await ctx.db.user.findUnique({ where: { email: existingToken.email } });
+      const existingUser = await ctx.db.user.findUnique({
+        where: { email: existingToken.email },
+      });
       if (!existingUser) {
         throw new TRPCError({
           code: "NOT_FOUND",

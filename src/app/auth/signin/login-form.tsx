@@ -1,33 +1,32 @@
-"use client"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { useState, useTransition } from "react";
 
-import { LoginSchema } from "@/schemas"
+import { LoginSchema } from "@/schemas";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import FormError from "@/components/form-error"
-import FormSuccess from "@/components/form-success"
-import { api } from "@/trpc/react"
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import FormError from "@/components/form-error";
+import FormSuccess from "@/components/form-success";
+import { api } from "@/trpc/react";
 import Link from "next/link";
-
 
 export const LoginForm = () => {
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
-      password: ""
-    }
+      password: "",
+    },
   });
 
   const [error, setError] = useState<string | undefined>("");
@@ -38,29 +37,26 @@ export const LoginForm = () => {
   const mutation = api.auth.login.useMutation({
     onSuccess: (data) => {
       form.reset();
-      setSuccess(data.success)
+      setSuccess(data.success);
     },
     onError: (data) => {
       form.reset();
-      setError(data.message)
-    }
-  })
+      setError(data.message);
+    },
+  });
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
 
     startTransition(() => {
-      mutation.mutate(values)
-    })
-  }
-
+      mutation.mutate(values);
+    });
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="email"
@@ -68,8 +64,11 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input disabled={isPending}
-                  placeholder="john.doe@example.com" {...field} />
+                <Input
+                  disabled={isPending}
+                  placeholder="john.doe@example.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,14 +81,9 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" disabled={isPending}
-                  {...field} />
+                <Input type="password" disabled={isPending} {...field} />
               </FormControl>
-              <Button
-                size="sm"
-                variant="link"
-                className="px-0 font-normal"
-              >
+              <Button size="sm" variant="link" className="px-0 font-normal">
                 <Link href="/auth/reset">Forgot password?</Link>
               </Button>
               <FormMessage />
@@ -103,5 +97,5 @@ export const LoginForm = () => {
         </Button>
       </form>
     </Form>
-  )
-}
+  );
+};

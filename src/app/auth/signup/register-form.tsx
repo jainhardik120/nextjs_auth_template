@@ -29,23 +29,27 @@ export function RegisterForm() {
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: { email: "jainhardik120@gmail.com", password: "17102003hj", name: "Hardik Jain" }
+    defaultValues: {
+      email: "jainhardik120@gmail.com",
+      password: "17102003hj",
+      name: "Hardik Jain",
+    },
   });
 
   const registerMutation = api.auth.register.useMutation({
     onSuccess: async (values) => {
-      setSuccess(values.success)
+      setSuccess(values.success);
     },
     onError: async (values) => {
-      setError(values.message)
-    }
-  })
+      setError(values.message);
+    },
+  });
 
   const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError("");
     setSuccess("");
     startTransition(() => {
-      registerMutation.mutate(values)
+      registerMutation.mutate(values);
     });
   };
 

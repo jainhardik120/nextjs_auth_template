@@ -1,14 +1,10 @@
-
 import { redirect } from "next/navigation"
 import { signIn } from "@/server/auth"
 import { providerMap } from "@/server/auth/config"
 import { AuthError } from "next-auth"
 import { LoginForm } from "./login-form"
 
-
-
 const SIGNIN_ERROR_URL = "/api/auth/error"
-
 
 export default function SignInPage() {
   return (

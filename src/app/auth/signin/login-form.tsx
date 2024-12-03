@@ -2,6 +2,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { useState, useTransition } from "react";
+
 import { LoginSchema } from "@/schemas"
 import {
   Form,
@@ -15,6 +17,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import FormError from "@/components/form-error"
 import FormSuccess from "@/components/form-success"
+import { api } from "@/trpc/react"
+import Link from "next/link";
 
 
 export const LoginForm = () => {
@@ -26,8 +30,29 @@ export const LoginForm = () => {
     }
   });
 
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+
+  const [isPending, startTransition] = useTransition();
+
+  const mutation = api.auth.login.useMutation({
+    onSuccess: (data) => {
+      form.reset();
+      setSuccess(data.success)
+    },
+    onError: (data) => {
+      form.reset();
+      setError(data.message)
+    }
+  })
+
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    console.log(values)
+    setError("");
+    setSuccess("");
+
+    startTransition(() => {
+      mutation.mutate(values)
+    })
   }
 
 
@@ -43,7 +68,8 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="john.doe@example.com" {...field} />
+                <Input disabled={isPending}
+                  placeholder="john.doe@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -56,15 +82,23 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" disabled={isPending}
+                  {...field} />
               </FormControl>
+              <Button
+                size="sm"
+                variant="link"
+                className="px-0 font-normal"
+              >
+                <Link href="/auth/reset">Forgot password?</Link>
+              </Button>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormError message=""/>
-        <FormSuccess message=""/>
-        <Button type="submit" className="w-full">
+        <FormError message={error} />
+        <FormSuccess message={success} />
+        <Button disabled={isPending} type="submit" className="w-full">
           Login
         </Button>
       </form>

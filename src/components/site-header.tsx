@@ -3,6 +3,7 @@ import React from "react";
 import { MobileNav } from "./mobile-nav";
 import { MainNav } from "./main-nav";
 import { CommandMenu } from "./command-menu";
+import UserButton from "./auth/user-button";
 
 const Header = () => {
   return (
@@ -15,6 +16,7 @@ const Header = () => {
             <CommandMenu />
           </div>
           <nav className="flex items-center gap-0.5">
+            <UserButton />
             <ModeToggle />
           </nav>
         </div>

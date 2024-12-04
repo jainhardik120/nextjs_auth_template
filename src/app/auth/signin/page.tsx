@@ -21,6 +21,8 @@ import { api } from "@/trpc/react";
 import Link from "next/link";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { useSearchParams } from "next/navigation";
+import { emailPasswordSignin, emailSignin } from "./emailSignin";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   return (
@@ -62,12 +64,18 @@ function LoginForm() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
 
-    startTransition(() => {
-      mutation.mutate({ ...values, callbackUrl: callbackUrl });
+    // startTransition(() => {
+    //   mutation.mutate({ ...values, callbackUrl: callbackUrl });
+    // });
+
+    await signIn("credentials", {
+      email: values.email,
+      password: values.password,
+      redirect: false,
     });
   };
 
@@ -118,7 +126,16 @@ function LoginForm() {
           <FormError message={error || urlError} />
           <FormSuccess message={success} />
           <Button disabled={isPending} type="submit" className="w-full">
-            Login
+            Login with password
+          </Button>
+          <Button
+            onClick={async () => {
+              emailSignin("jainhardik120@gmail.com");
+            }}
+            variant="outline"
+            className="w-full"
+          >
+            Send login link
           </Button>
         </form>
       </Form>

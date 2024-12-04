@@ -10,6 +10,7 @@ import SuperJSON from "superjson";
 import { type AppRouter } from "@/server/api/root";
 import { createQueryClient } from "./query-client";
 import { getBaseUrl } from "@/lib/getBaseUrl";
+import { env } from "@/env";
 
 // export type RouterInputs = inferRouterInputs<AppRouter>;
 
@@ -33,7 +34,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
       links: [
         loggerLink({
           enabled: (op) =>
-            process.env.NODE_ENV === "development" ||
+            env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
         unstable_httpBatchStreamLink({

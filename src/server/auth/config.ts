@@ -54,7 +54,7 @@ export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: providers,
   pages: {
-    signIn: "/signin",
+    signIn: "/auth/signin",
   },
   callbacks: {
     session: ({ session, user }) => ({

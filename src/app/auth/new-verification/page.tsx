@@ -1,13 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import FormSuccess from "@/components/form-success";
 import FormError from "@/components/form-error";
 import { api } from "@/trpc/react";
+import { CardWrapper } from "@/components/auth/card-wrapper";
 
-export default function NewVerificationForm() {
+export default function NewVerificationPage() {
+  return (
+    <Suspense>
+      <NewVerificationForm />
+    </Suspense>
+  );
+}
+
+function NewVerificationForm() {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
 
@@ -39,9 +48,15 @@ export default function NewVerificationForm() {
   }, [onsubmit]);
 
   return (
-    <div className="flex w-full items-center justify-center">
-      <FormSuccess message={success} />
-      {!success && <FormError message={error} />}
-    </div>
+    <CardWrapper
+      headerLabel="Confirming your verification"
+      backButtonHref="/auth/signin"
+      backButtonLabel="Back to login"
+    >
+      <div className="flex w-full items-center justify-center">
+        <FormSuccess message={success} />
+        {!success && <FormError message={error} />}
+      </div>
+    </CardWrapper>
   );
 }

@@ -97,69 +97,66 @@ export const authRouter = createTRPCRouter({
       });
       return { success: "Email verified!" };
     }),
-  login: publicProcedure.input(LoginSchema).mutation(async ({ ctx, input }) => {
-    const validatedFields = LoginSchema.safeParse(input);
+  login: publicProcedure
+    .input(
+      LoginSchema.extend({
+        callbackUrl: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { email, password } = input;
 
-    if (!validatedFields.success) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Invalid fields!",
+      const existingUser = await ctx.db.user.findUnique({
+        where: { email },
       });
-    }
 
-    const { email, password } = validatedFields.data;
-
-    const existingUser = await ctx.db.user.findUnique({
-      where: { email },
-    });
-
-    if (!existingUser || !existingUser.email || !existingUser.password) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Email does not exist or user signed in with OAuth!",
-      });
-    }
-
-    if (!existingUser.emailVerified) {
-      const verificationToken = await generateVerificationToken(
-        existingUser.email,
-      );
-      await sendVerificationEmail(
-        verificationToken.email,
-        verificationToken.token,
-      );
-
-      return { success: "Confirmation email sent!" };
-    }
-
-    try {
-      await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-    } catch (error) {
-      if (error instanceof AuthError) {
-        switch (error.type) {
-          case "CredentialsSignin":
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "Invalid credentials!",
-            });
-          default:
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Something went wrong!",
-            });
-        }
+      if (!existingUser || !existingUser.email || !existingUser.password) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email does not exist or user signed in with OAuth!",
+        });
       }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Something went wrong!",
-      });
-    }
-    return { success: "Logged in successfully!" };
-  }),
+
+      if (!existingUser.emailVerified) {
+        const verificationToken = await generateVerificationToken(
+          existingUser.email,
+        );
+        await sendVerificationEmail(
+          verificationToken.email,
+          verificationToken.token,
+        );
+
+        return { success: "Confirmation email sent!" };
+      }
+
+      try {
+        await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+      } catch (error) {
+        if (error instanceof AuthError) {
+          switch (error.type) {
+            case "CredentialsSignin":
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Invalid credentials!",
+              });
+            default:
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Something went wrong!",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong!",
+        });
+      }
+      return { success: "Logged in successfully!" };
+    }),
   resetPassword: publicProcedure
     .input(ResetSchema)
     .mutation(async ({ ctx, input }) => {

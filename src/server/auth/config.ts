@@ -25,15 +25,6 @@ class CustomError extends CredentialsSignin {
 }
 
 const providers: Provider[] = [
-  {
-    id: "email",
-    name: "Email",
-    type: "email",
-    maxAge: 60 * 60 * 24,
-    sendVerificationRequest: async (props) => {
-      console.log(props);
-    },
-  },
   Credentials({
     name: "Credentials",
     credentials: {
@@ -82,26 +73,24 @@ const providers: Provider[] = [
   }),
 ];
 
-export const providerMap = providers
-  .map((provider) => {
-    if (typeof provider === "function") {
-      const providerData = provider();
-      return {
-        id: providerData.id,
-        name: providerData.name,
-        type: providerData.type,
-      };
-    } else {
-      return { id: provider.id, name: provider.name, type: provider.type };
-    }
-  })
-  .filter(
-    (provider) => provider.type !== "credentials" && provider.type !== "email",
-  );
+export const authProviderOptions = {
+  providers: providers,
+} satisfies NextAuthConfig;
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
-  providers: providers,
+  providers: [
+    {
+      id: "email",
+      name: "Email",
+      type: "email",
+      maxAge: 60 * 60 * 24,
+      sendVerificationRequest: async (props) => {
+        console.log(props);
+      },
+    },
+    ...providers,
+  ],
   pages: {
     signIn: "/auth/signin",
     verifyRequest: "/auth/verify-request",

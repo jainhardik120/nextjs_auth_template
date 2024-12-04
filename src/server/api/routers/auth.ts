@@ -1,10 +1,5 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import {
-  LoginSchema,
-  NewPasswordSchema,
-  RegisterSchema,
-  ResetSchema,
-} from "@/schemas";
+import { NewPasswordSchema, RegisterSchema, ResetSchema } from "@/schemas";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import {
@@ -14,8 +9,6 @@ import {
 import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
 import * as z from "zod";
 import { getVerificationTokenByToken } from "@/data/verification-token";
-import { signIn } from "@/server/auth";
-import { AuthError } from "next-auth";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
 
 export const authRouter = createTRPCRouter({
@@ -96,67 +89,6 @@ export const authRouter = createTRPCRouter({
         where: { id: existingToken.id },
       });
       return { success: "Email verified!" };
-    }),
-  login: publicProcedure
-    .input(
-      LoginSchema.extend({
-        callbackUrl: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { email, password } = input;
-
-      const existingUser = await ctx.db.user.findUnique({
-        where: { email },
-      });
-
-      if (!existingUser || !existingUser.email || !existingUser.password) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Email does not exist or user signed in with OAuth!",
-        });
-      }
-
-      if (!existingUser.emailVerified) {
-        const verificationToken = await generateVerificationToken(
-          existingUser.email,
-        );
-        await sendVerificationEmail(
-          verificationToken.email,
-          verificationToken.token,
-        );
-
-        return { success: "Confirmation email sent!" };
-      }
-
-      try {
-        await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        });
-      } catch (error) {
-        console.log(error);
-        if (error instanceof AuthError) {
-          switch (error.type) {
-            case "CredentialsSignin":
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Invalid credentials!",
-              });
-            default:
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Something went wrong!",
-              });
-          }
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong!",
-        });
-      }
-      return { success: "Logged in successfully!" };
     }),
   resetPassword: publicProcedure
     .input(ResetSchema)

@@ -1,10 +1,28 @@
 import { prisma } from "@/lib/prisma";
 import { LoginSchema } from "@/schemas";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type NextAuthConfig } from "next-auth";
+import { CredentialsSignin, type NextAuthConfig } from "next-auth";
 import type { Provider } from "next-auth/providers";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/mail";
+
+export enum ErrorCode {
+  INVALID_CREDENTIALS = "invalid_credentials",
+  USER_NOT_FOUND = "user_not_found",
+  EMAIL_NOT_VERIFIED = "email_not_verified",
+  INVALID_REQUEST = "invalid_request",
+}
+
+class CustomError extends CredentialsSignin {
+  code: ErrorCode;
+  constructor(code: ErrorCode, message?: string) {
+    super(message || "An error occurred during the sign-in process");
+    this.code = code;
+    this.name = "CustomError";
+  }
+}
 
 const providers: Provider[] = [
   {
@@ -28,16 +46,38 @@ const providers: Provider[] = [
     },
     async authorize(credentials) {
       const validatedFields = LoginSchema.safeParse(credentials);
-      if (validatedFields.success) {
-        const { email, password } = validatedFields.data;
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || !user.password) return null;
-        const passwordsMatch = await bcrypt.compare(password, user.password);
-        if (passwordsMatch) {
-          return user;
-        }
+      if (!validatedFields.success) {
+        throw new CustomError(ErrorCode.INVALID_REQUEST);
       }
-      return null;
+
+      const { email, password } = validatedFields.data;
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+      if (!existingUser || !existingUser.email) {
+        throw new CustomError(ErrorCode.USER_NOT_FOUND);
+      }
+      if (!existingUser.password) {
+        throw new CustomError(ErrorCode.INVALID_CREDENTIALS);
+      }
+      if (!existingUser.emailVerified) {
+        const verificationToken = await generateVerificationToken(
+          existingUser.email,
+        );
+        await sendVerificationEmail(
+          verificationToken.email,
+          verificationToken.token,
+        );
+        throw new CustomError(ErrorCode.EMAIL_NOT_VERIFIED);
+      }
+      const passwordsMatch = await bcrypt.compare(
+        password,
+        existingUser.password,
+      );
+      if (passwordsMatch) {
+        return existingUser;
+      }
+      throw new CustomError(ErrorCode.INVALID_CREDENTIALS);
     },
   }),
 ];
@@ -64,6 +104,7 @@ export const authOptions = {
   providers: providers,
   pages: {
     signIn: "/auth/signin",
+    verifyRequest: "/auth/verify-request",
   },
   session: {
     strategy: "jwt",

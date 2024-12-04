@@ -1,4 +1,5 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,12 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import FormError from "@/components/form-error";
 import FormSuccess from "@/components/form-success";
-import { api } from "@/trpc/react";
 import Link from "next/link";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { useSearchParams } from "next/navigation";
-import { emailPasswordSignin, emailSignin } from "./emailSignin";
 import { signIn } from "next-auth/react";
+import { ErrorCode } from "@/server/auth/config";
 
 export default function LoginPage() {
   return (
@@ -35,10 +35,28 @@ export default function LoginPage() {
 function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with different provider"
-      : "";
+
+  const urlError: string | undefined = (() => {
+    switch (searchParams.get("error")) {
+      case "OAuthAccountNotLinked":
+        return "Email already in use with a different provider";
+      case "CredentialsSignin":
+        switch (searchParams.get("code")) {
+          case ErrorCode.INVALID_CREDENTIALS:
+            return "Invalid credentials provided";
+          case ErrorCode.USER_NOT_FOUND:
+            return "User not found";
+          case ErrorCode.EMAIL_NOT_VERIFIED:
+            return "Please verify your email address";
+          case ErrorCode.INVALID_REQUEST:
+            return "Invalid request";
+          default:
+            return "An unknown credentials error occurred";
+        }
+      default:
+        return undefined;
+    }
+  })();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -50,38 +68,36 @@ function LoginForm() {
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-
   const [isPending, startTransition] = useTransition();
-
-  const mutation = api.auth.login.useMutation({
-    onSuccess: (data) => {
-      form.reset();
-      setSuccess(data.success);
-    },
-    onError: (data) => {
-      form.reset();
-      setError(data.message);
-    },
-  });
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
-
-    // startTransition(() => {
-    //   mutation.mutate({ ...values, callbackUrl: callbackUrl });
-    // });
-
-    await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
+    startTransition(async () => {
+      await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirectTo: callbackUrl,
+      });
     });
+  };
+
+  const emailSignin = async () => {
+    const isValid = await form.trigger("email");
+    if (isValid) {
+      setError("");
+      startTransition(async () => {
+        await signIn("email", {
+          email: form.getValues("email"),
+          redirectTo: callbackUrl,
+        });
+      });
+    }
   };
 
   return (
     <CardWrapper
-      headerLabel={"Welcome back"}
+      headerLabel="Welcome back"
       backButtonLabel="Don't have an account?"
       backButtonHref="/auth/signup"
       showSocial
@@ -129,9 +145,8 @@ function LoginForm() {
             Login with password
           </Button>
           <Button
-            onClick={async () => {
-              emailSignin("jainhardik120@gmail.com");
-            }}
+            type="button"
+            onClick={emailSignin}
             variant="outline"
             className="w-full"
           >

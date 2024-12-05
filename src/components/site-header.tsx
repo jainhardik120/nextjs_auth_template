@@ -15,10 +15,8 @@ const Header = () => {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <CommandMenu />
           </div>
-          <nav className="flex items-center gap-0.5">
-            <UserButton />
-            <ModeToggle />
-          </nav>
+          <UserButton />
+          <ModeToggle />
         </div>
       </div>
     </header>

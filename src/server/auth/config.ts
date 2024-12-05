@@ -116,6 +116,7 @@ export const authOptions = {
       return true;
     },
     jwt: async ({ token }) => {
+      console.log("JWT Callback");
       if (!token.sub) return token;
       const existingUser = await prisma.user.findUnique({
         where: { id: token.sub },
@@ -133,6 +134,7 @@ export const authOptions = {
       return token;
     },
     session: async ({ token, session }) => {
+      console.log("Session Callback");
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }

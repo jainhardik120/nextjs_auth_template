@@ -9,4 +9,4 @@ export const authRoutes = [
   "/auth/verify-request",
 ];
 
-export const apiAuthPrefix = "/api/auth";
+export const apiAuthPrefix = ["/api/auth", "/api/trpc/auth"];

@@ -7,6 +7,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
+import { sendMail } from "@/lib/sendMail";
 
 export enum ErrorCode {
   INVALID_CREDENTIALS = "invalid_credentials",
@@ -86,7 +87,13 @@ export const authOptions = {
       type: "email",
       maxAge: 60 * 60 * 24,
       sendVerificationRequest: async (props) => {
-        console.log(props);
+        sendMail(
+          props.identifier,
+          "New login request",
+          "Click to login",
+          props.url,
+          "Click below button to login to the app",
+        );
       },
     },
     ...providers,
@@ -116,7 +123,6 @@ export const authOptions = {
       return true;
     },
     jwt: async ({ token }) => {
-      console.log("JWT Callback");
       if (!token.sub) return token;
       const existingUser = await prisma.user.findUnique({
         where: { id: token.sub },
@@ -134,7 +140,6 @@ export const authOptions = {
       return token;
     },
     session: async ({ token, session }) => {
-      console.log("Session Callback");
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }

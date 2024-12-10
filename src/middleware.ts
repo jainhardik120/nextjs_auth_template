@@ -5,11 +5,10 @@ import { authProviderOptions } from "./server/auth/config";
 const { auth } = NextAuth(authProviderOptions);
 
 export default auth((req) => {
-  console.log("Middleware Invoked");
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const isApiAuthRoute = apiAuthPrefix.some((prefix) =>
-    nextUrl.pathname.startsWith(prefix)
+    nextUrl.pathname.startsWith(prefix),
   );
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
@@ -29,7 +28,7 @@ export default auth((req) => {
     }
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     return Response.redirect(
-      new URL(`/auth/signin?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+      new URL(`/auth/signin?callbackUrl=${encodedCallbackUrl}`, nextUrl),
     );
   }
   return;

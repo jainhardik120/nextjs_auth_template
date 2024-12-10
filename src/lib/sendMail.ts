@@ -3,7 +3,7 @@ export const sendMail = (
   subject: string,
   cta_button_text: string,
   cta_button_link: string,
-  text: string
+  text: string,
 ) => {
   console.log(to);
   console.log(subject);

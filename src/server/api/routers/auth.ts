@@ -110,9 +110,9 @@ export const authRouter = createTRPCRouter({
           passwordResetToken.email,
           passwordResetToken.token,
         );
-
         return { success: "Reset password email sent" };
-      } catch {
+      } catch (error) {
+        console.log(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to send reset email. Please try again later.",

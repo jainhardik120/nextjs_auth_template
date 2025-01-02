@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 
 export function Social() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = searchParams?.get("callbackUrl");
 
   const onClick = (provider: "google" | "github") => {
     signIn(provider, { callbackUrl: callbackUrl || undefined });

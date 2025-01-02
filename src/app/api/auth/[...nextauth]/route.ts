@@ -8,7 +8,7 @@ async function apiHandler(req: NextRequest) {
   } else if (req.method === "POST") {
     response = await handlers.POST(req);
   } else {
-    return null;
+    return;
   }
   return response;
 }

@@ -1,5 +1,6 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
-import { sendMail } from "./sendMail";
+import { sendMail, sendSESEmail } from "./sendMail";
+import Email from "@/emails/reset-password";
 
 const appUrl = getBaseUrl();
 
@@ -16,11 +17,5 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
   const resetLink = `${appUrl}/auth/new-password?token=${token}`;
-  sendMail(
-    email,
-    "Reset your password",
-    "Click to reset your password",
-    resetLink,
-    "",
-  );
+  await sendSESEmail([email], "Reset your password", Email({ resetLink }));
 };

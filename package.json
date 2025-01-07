@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postinstall": "prisma generate",
     "canva:generate": "openapi-ts",
     "email:dev": "email dev --dir src/emails --port 3001",
     "start": "next start",

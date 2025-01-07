@@ -21,7 +21,7 @@ function NewVerificationForm() {
   const [success, setSuccess] = useState<string | undefined>();
 
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams?.get("token");
 
   const mutation = api.auth.verifyEmail.useMutation({
     onSuccess: (data) => {

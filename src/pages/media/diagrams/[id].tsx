@@ -1,8 +1,7 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import RootLayout from "@/components/root-layout";
 import dynamic from "next/dynamic";
-import { useEffect, useState, type ReactElement } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/sidebar/header";
 import { trpc } from "@/trpc/pages";
 import { ExcalidrawImportData, importExcalidraw } from "@/lib/excalidraw";
@@ -58,7 +57,3 @@ export default function Page({ id }: { id: string }) {
     </SidebarProvider>
   );
 }
-
-Page.getLayout = function getLayout(page: ReactElement) {
-  return <RootLayout>{page}</RootLayout>;
-};

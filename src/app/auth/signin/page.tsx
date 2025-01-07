@@ -34,14 +34,14 @@ export default function LoginPage() {
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || undefined;
+  const callbackUrl = searchParams?.get("callbackUrl") || undefined;
 
   const urlError: string | undefined = (() => {
-    switch (searchParams.get("error")) {
+    switch (searchParams?.get("error")) {
       case "OAuthAccountNotLinked":
         return "Email already in use with a different provider";
       case "CredentialsSignin":
-        switch (searchParams.get("code")) {
+        switch (searchParams?.get("code")) {
           case ErrorCode.INVALID_CREDENTIALS:
             return "Invalid credentials provided";
           case ErrorCode.USER_NOT_FOUND:
@@ -73,8 +73,8 @@ function LoginForm() {
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
-    startTransition(async () => {
-      await signIn("credentials", {
+    startTransition(() => {
+      signIn("credentials", {
         email: values.email,
         password: values.password,
         redirectTo: callbackUrl,
@@ -86,8 +86,8 @@ function LoginForm() {
     const isValid = await form.trigger("email");
     if (isValid) {
       setError("");
-      startTransition(async () => {
-        await signIn("email", {
+      startTransition(() => {
+        signIn("email", {
           email: form.getValues("email"),
           redirectTo: callbackUrl,
         });

@@ -16,6 +16,7 @@ const Header = () => {
             <div className="w-full flex-1 md:w-auto md:flex-none">
               <CommandMenu />
             </div>
+            {/* @ts-expect-error Server Component */}
             <UserButton />
             <ModeToggle />
           </div>

@@ -61,6 +61,18 @@ const data = {
         },
       ],
     },
+    {
+      title: "Blog",
+      url: "/posts" as Route,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Posts",
+          url: "/post" as Route,
+        },
+      ],
+    },
   ],
   projects: [
     {

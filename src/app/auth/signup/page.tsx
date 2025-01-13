@@ -38,11 +38,6 @@ function RegisterForm() {
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: {
-      email: "jainhardik120@gmail.com",
-      password: "17102003hj",
-      name: "Hardik Jain",
-    },
   });
 
   const registerMutation = api.auth.register.useMutation({

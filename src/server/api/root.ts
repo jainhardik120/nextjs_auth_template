@@ -4,12 +4,14 @@ import { createCallerFactory } from "@/server/api/trpc";
 import { authRouter } from "@/server/api/routers/auth";
 import { canvaRouter } from "@/server/api/routers/canva";
 import { excalidrawRouter } from "./routers/excalidraw";
+import { filesRouter } from "./routers/files";
 
 export const appRouter = createTRPCRouter({
   post: postRouter,
   auth: authRouter,
   canva: canvaRouter,
   excalidraw: excalidrawRouter,
+  files: filesRouter,
 });
 
 export type AppRouter = typeof appRouter;

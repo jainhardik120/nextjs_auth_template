@@ -1,5 +1,4 @@
 import Footer from "@/components/site-footer";
-import Header from "@/components/site-header";
 
 export default function PublicLayout({
   children,
@@ -8,7 +7,6 @@ export default function PublicLayout({
 }>) {
   return (
     <>
-      <Header />
       {children}
       <Footer />
     </>

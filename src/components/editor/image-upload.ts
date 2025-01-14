@@ -18,7 +18,6 @@ const onUpload = async (file: File): Promise<string> => {
     filename: filenameWithDatetime,
     filetype: file.type,
   });
-  console.log(signedUrl);
   const uploadResponse = await fetch(signedUrl, {
     method: "PUT",
     body: file,
@@ -28,7 +27,8 @@ const onUpload = async (file: File): Promise<string> => {
     throw new Error("Error occurred during file upload.");
   }
   const publicPath = extractPublicPath(stripQueryParameters(signedUrl));
-  return `${process.env.FILE_STORAGE_HOST}/${publicPath}`;
+  console.log(publicPath);
+  return `https://storage.hardikja.in/${publicPath}`;
 };
 
 export const uploadFn = createImageUpload({

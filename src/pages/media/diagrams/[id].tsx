@@ -1,10 +1,9 @@
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Header from "@/components/sidebar/header";
 import { trpc } from "@/trpc/pages";
 import { ExcalidrawImportData, importExcalidraw } from "@/lib/excalidraw";
+import { SidebarLayout } from "@/components/sidebar/sidebar-layout";
 
 const ExcalidrawWrapper = dynamic(
   async () => (await import("@/components/ExcalidrawWrapper")).default,
@@ -24,6 +23,7 @@ export async function getServerSideProps(context: { params: { id: string } }) {
 
 export default function Page({ id }: { id: string }) {
   const signedUrl = trpc.excalidraw.getSignedUrlDesign.useQuery({ id });
+  const session = trpc.auth.sessionDetails.useQuery().data || null;
   const [initialExcalidrawData, setInitialExcalidrawData] = useState<
     ExcalidrawImportData | undefined
   >(undefined);
@@ -45,15 +45,12 @@ export default function Page({ id }: { id: string }) {
       });
   }, [signedUrl.data]);
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        {error && <div>{error}</div>}
-        {isLoaded && initialExcalidrawData && (
-          <ExcalidrawWrapper initialData={initialExcalidrawData} />
-        )}
-      </SidebarInset>
-    </SidebarProvider>
+    <SidebarLayout session={session}>
+      <Header />
+      {error && <div>{error}</div>}
+      {isLoaded && initialExcalidrawData && (
+        <ExcalidrawWrapper initialData={initialExcalidrawData} />
+      )}
+    </SidebarLayout>
   );
 }

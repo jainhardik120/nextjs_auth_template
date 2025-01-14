@@ -20,20 +20,18 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 
-export function NavMain({
-  items,
-}: {
-  items: {
+export type NavItem = {
+  title: string;
+  url: Route;
+  icon?: LucideIcon;
+  isActive?: boolean;
+  items?: {
     title: string;
     url: Route;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: Route;
-    }[];
   }[];
-}) {
+};
+
+export function NavMain({ items }: { items: NavItem[] }) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>

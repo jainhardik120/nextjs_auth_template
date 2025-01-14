@@ -1,5 +1,9 @@
 import model from "@/lib/geminiModel";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { z } from "zod";
 
 export const postRouter = createTRPCRouter({
@@ -18,7 +22,7 @@ export const postRouter = createTRPCRouter({
     });
     return post.id;
   }),
-  getAllPosts: protectedProcedure.query(async ({ ctx }) => {
+  getAllPosts: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany();
     return posts;
   }),

@@ -12,6 +12,9 @@ import { getVerificationTokenByToken } from "@/data/verification-token";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
 
 export const authRouter = createTRPCRouter({
+  sessionDetails: publicProcedure.query(async ({ ctx }) => {
+    return ctx.session;
+  }),
   register: publicProcedure
     .input(RegisterSchema)
     .mutation(async ({ ctx, input }) => {

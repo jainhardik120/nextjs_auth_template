@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   AudioWaveform,
@@ -8,7 +6,7 @@ import {
   GalleryVerticalEnd,
   SquareTerminal,
 } from "lucide-react";
-import { NavUser } from "@/components/sidebar/nav-user";
+import { NavUser, User } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -16,12 +14,12 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { NavMain } from "./nav-main";
-// import { NavProjects } from "./nav-projects";
-import { TeamSwitcher } from "./team-switcher";
+import { NavItem, NavMain } from "./nav-main";
+import { NavProjects, Project } from "./nav-projects";
+import { Team, TeamSwitcher } from "./team-switcher";
 import type { Route } from "next";
 
-const data = {
+export const data: AppSidebarProps = {
   user: {
     name: "shadcn",
     email: "m@example.com",
@@ -44,7 +42,7 @@ const data = {
       plan: "Free",
     },
   ],
-  navMain: [
+  navItems: [
     {
       title: "Media",
       url: "/media" as Route,
@@ -52,12 +50,16 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Images",
+          title: "Canva Designs",
           url: "/media/images" as Route,
         },
         {
           title: "Diagrams",
           url: "/media/diagrams" as Route,
+        },
+        {
+          title: "Uploaded Media",
+          url: "/media/uploaded-media" as Route,
         },
       ],
     },
@@ -73,6 +75,18 @@ const data = {
         },
       ],
     },
+    {
+      title: "Messages",
+      url: "/messages" as Route,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Contact Messages",
+          url: "/messages" as Route,
+        },
+      ],
+    },
   ],
   projects: [
     {
@@ -83,18 +97,30 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export interface AppSidebarProps {
+  navItems: NavItem[];
+  user: User;
+  teams: Team[];
+  projects: Project[];
+}
+
+export function AppSidebar({
+  navItems,
+  user,
+  teams,
+  projects,
+}: AppSidebarProps) {
   return (
-    <Sidebar {...props}>
+    <Sidebar>
       <SidebarHeader className="h-16 border-b border-sidebar-border">
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
+        <NavMain items={navItems} />
+        <NavProjects projects={projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

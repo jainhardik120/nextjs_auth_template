@@ -16,4 +16,8 @@ const Email = ({ resetLink }: { resetLink: string }) => {
     </Tailwind>
   );
 };
+
 export default Email;
+
+export { render } from "@react-email/render";
+export { createElement as reactEmailCreateReactElement } from "react";

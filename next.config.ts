@@ -12,6 +12,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (
+    /** @type {import('webpack').Configuration & { externals: string[] }} */
+    config,
+    { isServer },
+  ) => {
+    if (isServer) {
+      config.externals.push('esbuild');
+    }
+
+    return config;
+  },
 };
 
 export default nextConfig;

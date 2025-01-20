@@ -6,10 +6,33 @@ import {
   generatePasswordResetToken,
   generateVerificationToken,
 } from "@/lib/tokens";
-import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
+import { default as ResetPasswordMail } from "@/emails/reset-password";
 import * as z from "zod";
 import { getVerificationTokenByToken } from "@/data/verification-token";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
+import { getBaseUrl } from "@/lib/getBaseUrl";
+import { default as VerifyMailEmail } from "@/emails/verify-email";
+import { sendSESEmail } from "@/lib/sendMail";
+
+const appUrl = getBaseUrl();
+
+export const sendVerificationEmail = async (email: string, token: string) => {
+  const confirmLink = `${appUrl}/auth/new-verification?token=${token}`;
+  await sendSESEmail(
+    [email],
+    "Verify your email",
+    VerifyMailEmail({ resetLink: confirmLink }),
+  );
+};
+
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  const resetLink = `${appUrl}/auth/new-password?token=${token}`;
+  await sendSESEmail(
+    [email],
+    "Reset your password",
+    ResetPasswordMail({ resetLink }),
+  );
+};
 
 export const authRouter = createTRPCRouter({
   sessionDetails: publicProcedure.query(async ({ ctx }) => {
@@ -47,6 +70,30 @@ export const authRouter = createTRPCRouter({
           password: hashedPassword,
         },
       });
+      const verificationToken = await generateVerificationToken(email);
+      await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token,
+      );
+      return { success: "Confirmation email sent!" };
+    }),
+  sendVerificationEmail: publicProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const email = input;
+      const existingUser = await ctx.db.user.findUnique({ where: { email } });
+      if (!existingUser) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email does not exist!",
+        });
+      }
+      if (existingUser.emailVerified) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email already verified!",
+        });
+      }
       const verificationToken = await generateVerificationToken(email);
       await sendVerificationEmail(
         verificationToken.email,

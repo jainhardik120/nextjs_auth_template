@@ -73,6 +73,7 @@
     "embla-carousel-react": "^8.5.2",
     "esbuild": "^0.24.2",
     "input-otp": "^1.4.2",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.462.0",
     "next": "^15.1.4",
     "next-auth": "^5.0.0-beta.25",
@@ -102,6 +103,7 @@
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.46.3",
     "@types/bcryptjs": "^2.4.6",
+    "@types/lodash": "^4.17.14",
     "@types/node": "^20.17.12",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.0",

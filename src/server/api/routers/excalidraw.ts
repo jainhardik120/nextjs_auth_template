@@ -20,45 +20,102 @@ export const excalidrawRouter = createTRPCRouter({
       },
     });
     const s3Client = new S3Client(config);
-    const params = {
-      Bucket: process.env.S3_BUCKET_NAME_NEW,
-      Key: "excalidraw_diagrams/" + newDesign.id + ".json",
+    const bucketName = process.env.S3_BUCKET_NAME_NEW;
+    const baseKey = `excalidraw_diagrams/${newDesign.id}`;
+    const elementsParams = {
+      Bucket: bucketName,
+      Key: `${baseKey}_elements.json`,
       Body: JSON.stringify({
         elements: [],
+      }),
+    };
+    const filesParams = {
+      Bucket: bucketName,
+      Key: `${baseKey}_files.json`,
+      Body: JSON.stringify({
         files: [],
       }),
     };
-    await s3Client.send(new PutObjectCommand(params));
+    await Promise.all([
+      s3Client.send(new PutObjectCommand(elementsParams)),
+      s3Client.send(new PutObjectCommand(filesParams)),
+    ]);
     return newDesign.id;
   }),
   getSignedUrlDesign: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       const client = new S3Client(config);
-      const params = {
-        Bucket: process.env.S3_BUCKET_NAME_NEW,
-        Key: "excalidraw_diagrams/" + input.id + ".json",
+      const bucketName = process.env.S3_BUCKET_NAME_NEW;
+      const baseKey = `excalidraw_diagrams/${input.id}`;
+      const elementsParams = {
+        Bucket: bucketName,
+        Key: `${baseKey}_elements.json`,
       };
-      const command = new GetObjectCommand(params);
-      const url = await getSignedUrl(client, command);
-      return url;
+      const filesParams = {
+        Bucket: bucketName,
+        Key: `${baseKey}_files.json`,
+      };
+      const elementsUrl = await getSignedUrl(
+        client,
+        new GetObjectCommand(elementsParams),
+      );
+      const filesUrl = await getSignedUrl(
+        client,
+        new GetObjectCommand(filesParams),
+      );
+      return {
+        elementsUrl,
+        filesUrl,
+      };
     }),
-  getSignedUrlForPut: protectedProcedure
+  getSignedUrlForPutFiles: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      const client = new S3Client(config);
+      const bucketName = process.env.S3_BUCKET_NAME_NEW;
+      const key = `excalidraw_diagrams/${input.id}_files.json`;
+
+      const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+        ContentType: "application/json",
+      });
+
+      const signedUrl = await getSignedUrl(client, command, {
+        expiresIn: 3600,
+      });
+      return signedUrl;
+    }),
+  updateElements: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        contentType: z.string(),
+        elements: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
       const client = new S3Client(config);
-      const params = {
-        Bucket: process.env.S3_BUCKET_NAME_NEW,
-        Key: "excalidraw_diagrams/" + input.id + ".json",
-        ContentType: input.contentType,
-      };
-      const command = new PutObjectCommand(params);
-      const url = await getSignedUrl(client, command, { expiresIn: 900 });
-      return url;
+      const bucketName = process.env.S3_BUCKET_NAME_NEW;
+      const key = `excalidraw_diagrams/${input.id}_elements.json`;
+
+      try {
+        JSON.parse(input.elements);
+
+        const command = new PutObjectCommand({
+          Bucket: bucketName,
+          Key: key,
+          Body: JSON.stringify({ elements: JSON.parse(input.elements) }),
+          ContentType: "application/json",
+        });
+
+        await client.send(command);
+        return { success: true };
+      } catch (error) {
+        console.error("Error updating elements:", error);
+        throw new Error(
+          "Failed to update elements. Ensure the input is valid JSON.",
+        );
+      }
     }),
 });

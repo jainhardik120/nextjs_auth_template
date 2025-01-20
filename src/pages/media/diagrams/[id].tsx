@@ -22,7 +22,10 @@ export async function getServerSideProps(context: { params: { id: string } }) {
 }
 
 export default function Page({ id }: { id: string }) {
-  const signedUrl = trpc.excalidraw.getSignedUrlDesign.useQuery({ id });
+  const signedUrl = trpc.excalidraw.getSignedUrlDesign.useQuery(
+    { id },
+    { enabled: false },
+  );
   const session = trpc.auth.sessionDetails.useQuery().data || null;
   const [initialExcalidrawData, setInitialExcalidrawData] = useState<
     ExcalidrawImportData | undefined
@@ -30,10 +33,14 @@ export default function Page({ id }: { id: string }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   useEffect(() => {
+    signedUrl.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     if (!signedUrl.data) {
       return;
     }
-    importExcalidraw(signedUrl.data)
+    importExcalidraw(signedUrl.data.elementsUrl, signedUrl.data.filesUrl)
       .then((data) => {
         setInitialExcalidrawData(data);
       })
@@ -49,7 +56,7 @@ export default function Page({ id }: { id: string }) {
       <Header />
       {error && <div>{error}</div>}
       {isLoaded && initialExcalidrawData && (
-        <ExcalidrawWrapper initialData={initialExcalidrawData} />
+        <ExcalidrawWrapper initialData={initialExcalidrawData} id={id} />
       )}
     </SidebarLayout>
   );

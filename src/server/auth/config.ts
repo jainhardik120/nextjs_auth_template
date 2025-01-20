@@ -5,9 +5,10 @@ import { CredentialsSignin, type NextAuthConfig } from "next-auth";
 import type { Provider } from "next-auth/providers";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { generateVerificationToken } from "@/lib/tokens";
-import { sendVerificationEmail } from "@/lib/mail";
-import { sendMail } from "@/lib/sendMail";
+// import { generateVerificationToken } from "@/lib/tokens";
+import { sendSESEmail } from "@/lib/sendMail";
+import { default as LoginRequestMail } from "@/emails/login-request";
+// import { sendVerificationEmail } from "../api/routers/auth";
 
 export enum ErrorCode {
   INVALID_CREDENTIALS = "invalid_credentials",
@@ -41,7 +42,6 @@ const providers: Provider[] = [
       if (!validatedFields.success) {
         throw new CustomError(ErrorCode.INVALID_REQUEST);
       }
-
       const { email, password } = validatedFields.data;
       const existingUser = await prisma.user.findUnique({
         where: { email },
@@ -53,13 +53,13 @@ const providers: Provider[] = [
         throw new CustomError(ErrorCode.INVALID_CREDENTIALS);
       }
       if (!existingUser.emailVerified) {
-        const verificationToken = await generateVerificationToken(
-          existingUser.email,
-        );
-        await sendVerificationEmail(
-          verificationToken.email,
-          verificationToken.token,
-        );
+        // const verificationToken = await generateVerificationToken(
+        //   existingUser.email
+        // );
+        // await sendVerificationEmail(
+        //   verificationToken.email,
+        //   verificationToken.token
+        // );
         throw new CustomError(ErrorCode.EMAIL_NOT_VERIFIED);
       }
       const passwordsMatch = await bcrypt.compare(
@@ -87,12 +87,10 @@ export const authOptions = {
       type: "email",
       maxAge: 60 * 60 * 24,
       sendVerificationRequest: async (props) => {
-        sendMail(
-          props.identifier,
+        await sendSESEmail(
+          [props.identifier],
           "New login request",
-          "Click to login",
-          props.url,
-          "Click below button to login to the app",
+          LoginRequestMail({ resetLink: props.url }),
         );
       },
     },

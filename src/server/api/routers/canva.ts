@@ -33,7 +33,6 @@ export const canvaRouter = createTRPCRouter({
           code: "BAD_REQUEST",
         });
       }
-      console.log(JSON.stringify(result.data));
       return result.data;
     }),
   listExports: protectedProcedure

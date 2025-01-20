@@ -10,7 +10,7 @@ import type { EmailTemplate as EmailComponent } from "./types/email-template";
 import type { ErrorObject } from "./types/error-object";
 
 export const getEmailComponent = async (
-  emailPath: string
+  emailPath: string,
 ): Promise<
   | {
       emailComponent: EmailComponent;
@@ -27,7 +27,11 @@ export const getEmailComponent = async (
   try {
     const buildData = await build({
       bundle: true,
-      entryPoints: ["D:/nextjs-pro/src/emails/reset-password.tsx"],
+      stdin: {
+        contents: emailPath,
+        resolveDir: path.dirname("email-template"),
+        sourcefile: "email-template.tsx",
+      },
       platform: "node",
       write: false,
       format: "cjs",
@@ -80,8 +84,8 @@ export const getEmailComponent = async (
         reactEmailCreateReactElement: undefined as unknown,
       },
     },
-    __filename: emailPath,
-    __dirname: path.dirname(emailPath),
+    __filename: "email-template.tsx",
+    __dirname: path.dirname("email-template"),
     require: (specifiedModule: string) => {
       let m = specifiedModule;
       if (specifiedModule.startsWith("node:")) {
@@ -100,32 +104,37 @@ export const getEmailComponent = async (
   const sourceMapToEmail = JSON.parse(sourceMapFile.text) as RawSourceMap;
   sourceMapToEmail.sourceRoot = path.resolve(sourceMapFile.path, "../..");
   sourceMapToEmail.sources = sourceMapToEmail.sources.map((source) =>
-    path.resolve(sourceMapFile.path, "..", source)
+    path.resolve(sourceMapFile.path, "..", source),
   );
   try {
-    vm.runInNewContext(builtEmailCode, fakeContext, { filename: emailPath });
+    vm.runInNewContext(builtEmailCode, fakeContext, {
+      filename: "email-template.tsx",
+    });
   } catch (exception) {
     const error = exception as Error;
     error.stack &&= error.stack.split("at Script.runInContext (node:vm")[0];
     return {
-      error: improveErrorWithSourceMap(error, emailPath, sourceMapToEmail),
+      error: improveErrorWithSourceMap(
+        error,
+        "email-template.tsx",
+        sourceMapToEmail,
+      ),
     };
   }
   if (fakeContext.module.exports.default === undefined) {
     return {
       error: improveErrorWithSourceMap(
-        new Error(
-          `The email component at ${emailPath} does not contain a default export`
-        ),
-        emailPath,
-        sourceMapToEmail
+        new Error(`The email component at  does not contain a default export`),
+        "email-template.tsx",
+        sourceMapToEmail,
       ),
     };
   }
   return {
     emailComponent: fakeContext.module.exports.default as EmailComponent,
     render: fakeContext.module.exports.render as typeof render,
-    createElement:  fakeContext.module.exports.reactEmailCreateReactElement as typeof React.createElement,
+    createElement: fakeContext.module.exports
+      .reactEmailCreateReactElement as typeof React.createElement,
     sourceMapToOriginalFile: sourceMapToEmail,
   };
 };

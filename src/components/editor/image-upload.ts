@@ -23,11 +23,9 @@ const onUpload = async (file: File): Promise<string> => {
     body: file,
   });
   if (!uploadResponse.ok) {
-    console.log(uploadResponse.body);
     throw new Error("Error occurred during file upload.");
   }
   const publicPath = extractPublicPath(stripQueryParameters(signedUrl));
-  console.log(publicPath);
   return `https://storage.hardikja.in/${publicPath}`;
 };
 

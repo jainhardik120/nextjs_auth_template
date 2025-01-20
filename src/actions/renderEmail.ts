@@ -1,5 +1,5 @@
 "use server";
-import fs from "node:fs";
+// import fs from "node:fs";
 import { getEmailComponent } from "./utils/get-email-component";
 import { improveErrorWithSourceMap } from "./utils/improve-error-with-sourcemap";
 import type { ErrorObject } from "./utils/types/error-object";
@@ -17,7 +17,7 @@ export type EmailRenderingResult =
     };
 
 export const renderEmail = async (
-  emailPath: string
+  emailPath: string,
 ): Promise<EmailRenderingResult> => {
   const componentResult = await getEmailComponent(emailPath);
 
@@ -42,24 +42,23 @@ export const renderEmail = async (
       createElement(EmailComponent, previewProps),
       {
         plainText: true,
-      }
+      },
     );
-    const reactMarkup = await fs.promises.readFile(emailPath, "utf-8");
+    // const reactMarkup = await fs.promises.readFile(emailPath, "utf-8");
     const renderingResult = {
       markup: markup.replaceAll("\0", ""),
       plainText,
-      reactMarkup,
+      reactMarkup: "",
     };
 
     return renderingResult;
   } catch (exception) {
-    console.log("exception", exception);
     const error = exception as Error;
     return {
       error: improveErrorWithSourceMap(
         error,
         emailPath,
-        sourceMapToOriginalFile
+        sourceMapToOriginalFile,
       ),
     };
   }

@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
     { isServer },
   ) => {
     if (isServer) {
-      config.externals.push('esbuild');
+      config.externals.push("esbuild");
     }
 
     return config;

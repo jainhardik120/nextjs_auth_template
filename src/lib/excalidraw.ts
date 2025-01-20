@@ -15,7 +15,6 @@ export const exportExcalidraw = async (
   const excalidrawData = JSON.stringify({ elements, files: filesArray });
   try {
     localStorage.setItem("excalidrawData", excalidrawData);
-    console.log("Data successfully saved to localStorage.");
   } catch (error) {
     console.error("Error saving data:", error);
     throw error;
@@ -28,21 +27,34 @@ export type ExcalidrawImportData = {
 };
 
 export const importExcalidraw = async (
-  signedUrl: string,
+  elementsUrl: string,
+  filesUrl: string,
 ): Promise<ExcalidrawImportData> => {
-  if (!signedUrl) {
-    throw new Error("Signed URL is required.");
+  if (!elementsUrl || !filesUrl) {
+    throw new Error("Both elementsUrl and filesUrl are required.");
   }
-  console.log("Signed URL:", signedUrl);
   try {
-    const response = await fetch(signedUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch the file. Status: ${response.status}`);
+    const elementsResponse = await fetch(elementsUrl);
+    if (!elementsResponse.ok) {
+      throw new Error(
+        `Failed to fetch elements file. Status: ${elementsResponse.status}`,
+      );
     }
-    const excalidrawData = await response.json();
-    return excalidrawData;
+    const elementsData = await elementsResponse.json();
+    const filesResponse = await fetch(filesUrl);
+    if (!filesResponse.ok) {
+      throw new Error(
+        `Failed to fetch files file. Status: ${filesResponse.status}`,
+      );
+    }
+    const filesData = await filesResponse.json();
+    const combinedData: ExcalidrawImportData = {
+      elements: elementsData.elements || [],
+      files: filesData.files || [],
+    };
+    return combinedData;
   } catch (error) {
-    console.error("Error fetching or parsing the JSON file:", error);
+    console.error("Error fetching or parsing the JSON files:", error);
     throw new Error("Failed to import Excalidraw data.");
   }
 };

@@ -1,7 +1,7 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import type { Loader, PluginBuild, ResolveOptions } from 'esbuild';
-import { escapeStringForRegex } from './escape-string-for-regex';
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import type { Loader, PluginBuild, ResolveOptions } from "esbuild";
+import { escapeStringForRegex } from "./escape-string-for-regex";
 
 /**
  * Made to export the `render` function out of the user's email template
@@ -15,19 +15,19 @@ import { escapeStringForRegex } from './escape-string-for-regex';
  * in the CLI vs. the version the user has on their emails.
  */
 export const renderingUtilitiesExporter = (emailTemplates: string[]) => ({
-  name: 'rendering-utilities-exporter',
+  name: "rendering-utilities-exporter",
   setup: (b: PluginBuild) => {
     b.onLoad(
       {
         filter: new RegExp(
           emailTemplates
             .map((emailPath) => escapeStringForRegex(emailPath))
-            .join('|'),
+            .join("|"),
         ),
       },
       async ({ path: pathToFile }) => {
         return {
-          contents: `${await fs.readFile(pathToFile, 'utf8')};
+          contents: `${await fs.readFile(pathToFile, "utf8")};
           export { render } from 'react-email-module-that-will-export-render'
           export { createElement as reactEmailCreateReactElement } from 'react';
         `,
@@ -40,24 +40,27 @@ export const renderingUtilitiesExporter = (emailTemplates: string[]) => ({
       { filter: /^react-email-module-that-will-export-render$/ },
       async (args) => {
         const options: ResolveOptions = {
-          kind: 'import-statement',
+          kind: "import-statement",
           importer: args.importer,
           resolveDir: args.resolveDir,
           namespace: args.namespace,
         };
-        let result = await b.resolve('@react-email/render', options);
+        let result = await b.resolve("@react-email/render", options);
 
         if (result.errors.length > 0) {
-          console.error('Error resolving @react-email/render:', result.errors);
+          console.error("Error resolving @react-email/render:", result.errors);
         }
-    
+
         if (result.errors.length === 0) {
           return result;
         }
-    
-        result = await b.resolve('@react-email/components', options);
+
+        result = await b.resolve("@react-email/components", options);
         if (result.errors.length > 0) {
-          console.error('Error resolving @react-email/components:', result.errors);
+          console.error(
+            "Error resolving @react-email/components:",
+            result.errors,
+          );
         }
         return result;
       },

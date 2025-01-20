@@ -8,7 +8,6 @@ import { z } from "zod";
 
 export const postRouter = createTRPCRouter({
   createNewPost: protectedProcedure.mutation(async ({ ctx }) => {
-    console.log(ctx.session.user.id);
     const post = await ctx.db.post.create({
       data: {
         authorId: ctx.session.user.id,

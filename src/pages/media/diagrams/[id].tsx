@@ -4,6 +4,7 @@ import Header from "@/components/sidebar/header";
 import { trpc } from "@/trpc/pages";
 import { ExcalidrawImportData, importExcalidraw } from "@/lib/excalidraw";
 import { SidebarLayout } from "@/components/sidebar/sidebar-layout";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ExcalidrawWrapper = dynamic(
   async () => (await import("@/components/ExcalidrawWrapper")).default,
@@ -53,8 +54,14 @@ export default function Page({ id }: { id: string }) {
   }, [signedUrl.data]);
   return (
     <SidebarLayout session={session}>
-      <Header />
+      <Header>
+        <div className="flex w-full flex-row justify-between items-center">
+          <p>Excalidraw Diagram</p>
+          <p>End title</p>
+        </div>
+      </Header>
       {error && <div>{error}</div>}
+      {!isLoaded && <Skeleton className="w-full h-full" />}
       {isLoaded && initialExcalidrawData && (
         <ExcalidrawWrapper initialData={initialExcalidrawData} id={id} />
       )}

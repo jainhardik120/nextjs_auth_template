@@ -1,5 +1,6 @@
 import { api } from "@/trpc/server";
 import { Post } from "@prisma/client";
+import { Route } from "next";
 import Link from "next/link";
 
 export default async function BlogSection() {
@@ -13,7 +14,7 @@ export default async function BlogSection() {
         <h2 className="text-center text-4xl font-bold">Blog</h2>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-4xl">
           {blogs.map((blog) => (
-            <Link key={blog.id} href={`/post/${blog.id}`}>
+            <Link key={blog.id} href={`/post/${blog.id}` as Route}>
               <div className="flex flex-col h-full justify-between overflow-x-hidden">
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight">

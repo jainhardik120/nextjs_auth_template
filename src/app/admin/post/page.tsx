@@ -53,7 +53,7 @@ const PostsPage: React.FC = () => {
   const posts = api.post.getAllPosts.useQuery();
   const mutation = api.post.createNewPost.useMutation({
     onSuccess: (response) => {
-      router.push(`/post/${response}`);
+      router.push(`/admin/post/${response}`);
     },
   });
   return (

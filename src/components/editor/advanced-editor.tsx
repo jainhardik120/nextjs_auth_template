@@ -1,5 +1,10 @@
 "use client";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import {
   EditorRoot,
   EditorCommand,
@@ -22,6 +27,8 @@ import { slashCommand, suggestionItems } from "./slash-command";
 import { handleImageDrop, handleImagePaste } from "novel/plugins";
 import { uploadFn } from "./image-upload";
 import { Separator } from "../ui/separator";
+
+import "@/styles/prosemirror.css";
 
 import { useDebouncedCallback } from "use-debounce";
 
@@ -68,6 +75,10 @@ const Editor = forwardRef<EditorRef, EditorProp>(
         return null;
       },
     }));
+
+    useEffect(() => {
+      console.log(initialValue);
+    }, [initialValue]);
 
     return (
       <EditorRoot>

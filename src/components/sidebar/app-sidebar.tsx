@@ -45,45 +45,45 @@ export const data: AppSidebarProps = {
   navItems: [
     {
       title: "Media",
-      url: "/media" as Route,
+      url: "/admin/media" as Route,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Canva Designs",
-          url: "/media/images" as Route,
+          url: "/admin/media/images" as Route,
         },
         {
           title: "Diagrams",
-          url: "/media/diagrams" as Route,
+          url: "/admin/media/diagrams" as Route,
         },
         {
           title: "Uploaded Media",
-          url: "/media/uploaded-media" as Route,
+          url: "/admin/media/uploaded-media" as Route,
         },
       ],
     },
     {
       title: "Blog",
-      url: "/posts" as Route,
+      url: "/admin/posts" as Route,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Posts",
-          url: "/post" as Route,
+          url: "/admin/post" as Route,
         },
       ],
     },
     {
       title: "Messages",
-      url: "/messages" as Route,
+      url: "/admin/messages" as Route,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Contact Messages",
-          url: "/messages" as Route,
+          url: "/admin/messages" as Route,
         },
       ],
     },

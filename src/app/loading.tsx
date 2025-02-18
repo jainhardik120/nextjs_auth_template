@@ -1,3 +1,7 @@
 export default function LoadingPage() {
-  return <div>Loading...</div>;
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      Loading...
+    </div>
+  );
 }

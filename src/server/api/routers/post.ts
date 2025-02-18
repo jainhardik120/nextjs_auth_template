@@ -5,6 +5,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
+import { generateSlug } from "random-word-slugs";
 
 export const postRouter = createTRPCRouter({
   createNewPost: protectedProcedure.mutation(async ({ ctx }) => {
@@ -16,7 +17,7 @@ export const postRouter = createTRPCRouter({
           type: "doc",
           content: [],
         }),
-        slug: "",
+        slug: generateSlug(),
       },
     });
     return post.id;

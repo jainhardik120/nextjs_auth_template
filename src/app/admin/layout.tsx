@@ -10,7 +10,7 @@ export default async function MainLayout({
   const session = await auth();
   return (
     <SidebarLayout session={session}>
-      <Header />
+      <Header>Header Content</Header>
       <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
     </SidebarLayout>
   );
